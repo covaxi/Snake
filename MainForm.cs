@@ -37,6 +37,9 @@ namespace SnakeBattle
         {
 
         }
+        #region События
+
+        #region Кнопички
 
         private void bConnect_Click(object sender, EventArgs e)
         {
@@ -48,6 +51,14 @@ namespace SnakeBattle
             ToggleLogWindow();
         }
 
+        private void bResize_Click(object sender, EventArgs e)
+        {
+            ResizeDefault();
+        }
+
+        #endregion
+        #region Колдунства
+
         private void MainForm_Activated(object sender, EventArgs e)
         {
             if (FirstTimeActivation)
@@ -56,5 +67,7 @@ namespace SnakeBattle
                 FirstTimeActivation = false;
             }
         }
+
+        #endregion
     }
 }

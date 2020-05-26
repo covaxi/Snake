@@ -72,7 +72,7 @@
             this.bConnect.Name = "bConnect";
             this.bConnect.Size = new System.Drawing.Size(75, 23);
             this.bConnect.TabIndex = 3;
-            this.bConnect.Text = "button1";
+            this.bConnect.Text = "Connect";
             this.bConnect.UseVisualStyleBackColor = true;
             this.bConnect.Click += new System.EventHandler(this.bConnect_Click);
             // 
@@ -82,7 +82,7 @@
             this.bShowLog.Name = "bShowLog";
             this.bShowLog.Size = new System.Drawing.Size(75, 23);
             this.bShowLog.TabIndex = 4;
-            this.bShowLog.Text = "button2";
+            this.bShowLog.Text = "Toggle log";
             this.bShowLog.UseVisualStyleBackColor = true;
             this.bShowLog.Click += new System.EventHandler(this.bShowLog_Click);
             // 
@@ -92,8 +92,9 @@
             this.bResize.Name = "bResize";
             this.bResize.Size = new System.Drawing.Size(75, 23);
             this.bResize.TabIndex = 5;
-            this.bResize.Text = "button1";
+            this.bResize.Text = "Resize";
             this.bResize.UseVisualStyleBackColor = true;
+            this.bResize.Click += new System.EventHandler(this.bResize_Click);
             // 
             // MainForm
             // 

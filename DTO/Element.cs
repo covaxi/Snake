@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SnakeBattle.API
+namespace SnakeBattle.DTO
 {
     public enum Element : short
     {
