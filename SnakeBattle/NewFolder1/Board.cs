@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,10 +10,23 @@ using System.Threading.Tasks;
 
 namespace SnakeBattle.NewFolder1
 {
-    public class Board
+    public class Board : IEnumerable<Element>
     {
         public int Size { get; set; } = 0;
-        public Element[,] Elements { get; set; } = new Element[0, 0];
+        private Element[,] Elements { get; set; } = new Element[0, 0];
+        public int X { get; set; }
+        public int Y { get; set; }
+        public Direction Direction { get; private set; }
+
+        public IEnumerable<Element> AllElements = new Element[0];
+
+        public Element this[int x, int y]
+        {
+            get
+            {
+                return Elements[x, y];
+            }
+        }
 
         public static Random Rnd = new Random();
 
@@ -28,7 +42,7 @@ namespace SnakeBattle.NewFolder1
         {
             Size = size;
             Elements = new Element[Size, Size];
-
+            AllElements = new Element[0];
         }
 
         public Board GetEmpty()
@@ -53,34 +67,74 @@ namespace SnakeBattle.NewFolder1
             return newBoard;
         }
 
+        public IEnumerable<Element> GetNearest()
+        {
+            return AllElements
+                .Where(e => e.AnyOf(Constants.ElementsToReach))
+                .OrderBy(e => Math.Abs(e.X - X) + Math.Abs(e.Y - Y));
+        }
+
         public Direction GetMove()
         {
-            var x = -1;
-            var y = -1;
-
-            var board = GetEmpty();
-            for (int i = 0; i < Size && x == -1; i++)
+            var moves = new List<(Direction, Element)>();
+            var nearest = GetNearest().Take(3).ToList();
+            foreach (var elem in nearest)
             {
-                for (int j = 0; j < Size; j++)
+                if (X == elem.X)
                 {
-                    if (Elements[i, j].Symbol.AnyOf(Constants.MyHead))
-                    {
-                        x = i; y = j;
-                        break;
-                    }
+                    if (Y < elem.Y && CanMove(X, Y, Direction.Down))
+                        moves.Add((Direction.Down, elem));
+                    if (Y > elem.Y && CanMove(X, Y, Direction.Up))
+                        moves.Add((Direction.Up, elem));
                 }
-            }
 
-            List<Direction> moves = new List<Direction>();
-            foreach(Direction dir in Enum.GetValues(typeof(Direction)))
-            {
-                if (CanMove(x, y, dir))
-                    moves.Add(dir);
-            }
+                if (Y == elem.Y)
+                {
+                    if (X < elem.X && CanMove(X, Y, Direction.Right))
+                        moves.Add((Direction.Right, elem));
+                    if (X > elem.X && CanMove(X, Y, Direction.Left))
+                        moves.Add((Direction.Right, elem));
+                }
 
+                if (X > elem.X && Y > elem.Y)
+                {
+                    if (CanMove(X, Y, Direction.Left))
+                        moves.Add((Direction.Left, elem));
+                    if (CanMove(X, Y, Direction.Up))
+                        moves.Add((Direction.Up, elem));
+                }
+
+                if (X > elem.X && Y < elem.Y)
+                {
+                    if (CanMove(X, Y, Direction.Left))
+                        moves.Add((Direction.Left, elem));
+                    if (CanMove(X, Y, Direction.Down))
+                        moves.Add((Direction.Down, elem));
+                }
+
+                if (X < elem.X && Y > elem.Y)
+                {
+                    if (CanMove(X, Y, Direction.Right))
+                        moves.Add((Direction.Right, elem));
+                    if (CanMove(X, Y, Direction.Up))
+                        moves.Add((Direction.Up, elem));
+                }
+
+                if (X < elem.X && Y < elem.Y)
+                {
+                    if (CanMove(X, Y, Direction.Right))
+                        moves.Add((Direction.Right, elem));
+                    if (CanMove(X, Y, Direction.Down))
+                        moves.Add((Direction.Down, elem));
+                }
+
+            }
+            var res = (Direction.None, new Element(0,0));
             if (moves.Count > 0)
-                return moves[Rnd.Next(moves.Count)];
-            return Direction.None;
+                res = moves[Rnd.Next(moves.Count)];
+            Console.WriteLine($@"({X},{Y}) {res.Item1} => {res.Item2.X}{res.Item2.Y}
+{string.Join(Environment.NewLine, nearest.Select(n => $"{n.Symbol} ({n.X}, {n.Y})"))}");
+            return res.Item1;
         }
 
         public bool CanMove(int x, int y, Direction dir)
@@ -90,13 +144,13 @@ namespace SnakeBattle.NewFolder1
             switch(dir)
             {
                 case Direction.Down:
-                    return y < Size && Elements[x, y + 1].Symbol.AnyOf(Constants.Passable);
+                    return Direction != Direction.Up && y < Size - 1 && Elements[x, y + 1].Symbol.AnyOf(Constants.Passable);
                 case Direction.Up:
-                    return y > 0 && Elements[x, y - 1].Symbol.AnyOf(Constants.Passable);
+                    return Direction != Direction.Down && y > 0 && Elements[x, y - 1].Symbol.AnyOf(Constants.Passable);
                 case Direction.Left:
-                    return x < Size && Elements[x - 1, y + 1].Symbol.AnyOf(Constants.Passable);
+                    return Direction != Direction.Right && x < Size - 1&& Elements[x - 1, y].Symbol.AnyOf(Constants.Passable);
                 case Direction.Right:
-                    return x > 0 && Elements[x + 1, y].Symbol.AnyOf(Constants.Passable);
+                    return Direction != Direction.Left && x > 0 && Elements[x + 1, y].Symbol.AnyOf(Constants.Passable);
                 case Direction.None:
                     return false; // Туда мы не пойдём
             }
@@ -105,6 +159,7 @@ namespace SnakeBattle.NewFolder1
 
         public void Restart()
         {
+            Console.WriteLine("RESTART RESTART RESTART RESTART RESTART RESTART RESTART RESTART RESTART RESTART RESTART RESTART ");
             // TODO
         }
 
@@ -123,13 +178,51 @@ namespace SnakeBattle.NewFolder1
 
             foreach(var c in board)
             {
-                Elements[x++, y] = new Element(x, y, c);
+                Elements[x, y] = new Element(x, y, c);
+                if (c.AnyOf(Constants.MyHead))
+                {
+                    X = x;
+                    Y = y;
+                    Direction = Direction.None;
+
+                    switch (c)
+                    {
+                        case Constants.HeadRight:
+                        case Constants.HeadSleep:
+                        case Constants.HeadDead:
+                            {
+                                Direction = Direction.Right;
+                                break;
+                            }
+                        case Constants.HeadLeft:
+                            {
+                                Direction = Direction.Left;
+                                break;
+                            }
+                        case Constants.HeadDown:
+                            {
+                                Direction = Direction.Down;
+                                break;
+                            }
+                        case Constants.HeadUp:
+                            {
+                                Direction = Direction.Up;
+                                break;
+                            }
+                        default:
+                            Restart();
+                            break;
+                    }
+                    
+                }
+                x++;
                 if (x >= Size)
                 {
-                    y++; 
+                    y++;
                     x = 0;
                 }
             }
+            AllElements = Elements.Flatten();
         }
 
         public override string ToString()
@@ -142,6 +235,16 @@ namespace SnakeBattle.NewFolder1
                 result += Environment.NewLine;
             }
             return result;
+        }
+
+        public IEnumerator<Element> GetEnumerator()
+        {
+            return Elements.Cast<Element>().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Elements.Cast<Element>().GetEnumerator();
         }
     }
 }

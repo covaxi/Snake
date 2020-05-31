@@ -32,14 +32,11 @@ namespace SnakeBattle
 
         private void Socket_OnMessage(object sender, MessageEventArgs e)
         {
-            board.Process(e.Data);
+            board.Process(e.Data.Replace("board=", ""));
             Console.Clear();
 
             Log($"{Environment.NewLine}{board}");
-            Direction res = board.GetMove();
-            Log($"==> {res}");
-
-            socket.Send($"{res}");
+            socket.Send(board.GetMove().ToString());
         }
 
         private void Socket_OnOpen(object sender, EventArgs e)
