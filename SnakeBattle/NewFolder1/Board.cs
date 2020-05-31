@@ -10,13 +10,19 @@ using System.Threading.Tasks;
 
 namespace SnakeBattle.NewFolder1
 {
-    public class Board : IEnumerable<Element>
+    public class Board
     {
         public int Size { get; set; } = 0;
         private Element[,] Elements { get; set; } = new Element[0, 0];
         public int X { get; set; }
         public int Y { get; set; }
         public Direction Direction { get; private set; }
+        public int Rage { get; set; } = 0;
+        public int Length { get; set; } = 2;
+        public int Score { get; set; } = 0;
+        public int Stones { get; private set; }
+        public List<Direction> Moves = new List<Direction>();
+        public string QQ = "";
 
         public IEnumerable<Element> AllElements = new Element[0];
 
@@ -67,74 +73,74 @@ namespace SnakeBattle.NewFolder1
             return newBoard;
         }
 
-        public IEnumerable<Element> GetNearest()
+        public IEnumerable<Element> GetNearest(int maxDistance = 0, params char[] elements)
         {
+            if (!elements.Any())
+                elements = Constants.ElementsToReach;
             return AllElements
-                .Where(e => e.AnyOf(Constants.ElementsToReach))
-                .OrderBy(e => Math.Abs(e.X - X) + Math.Abs(e.Y - Y));
+                .Where(e => e.AnyOf(elements))
+                .Select(e => new { Element = e, Distance = Math.Abs(e.X - X) + Math.Abs(e.Y - Y) })
+                .Where(e => maxDistance == 0 || e.Distance < maxDistance)
+                .OrderBy(e => e.Distance)
+                .Select(e => e.Element);
         }
 
         public Direction GetMove()
         {
-            var moves = new List<(Direction, Element)>();
-            var nearest = GetNearest().Take(3).ToList();
-            foreach (var elem in nearest)
+            var boards = new List<(Board Board, bool Processed)>();
+            boards.Add((this, false));
+            var allBoards = new Board[Size, Size];
+            allBoards[X, Y] = this;
+
+            int moves = 0;
+            int oldCount = 0;
+            while(moves < 150)
             {
-                if (X == elem.X)
+                var newBoards = new List<(Board Board, bool Processed)>();
+                int i = 0;
+                while(i < boards.Count)
                 {
-                    if (Y < elem.Y && CanMove(X, Y, Direction.Down))
-                        moves.Add((Direction.Down, elem));
-                    if (Y > elem.Y && CanMove(X, Y, Direction.Up))
-                        moves.Add((Direction.Up, elem));
-                }
+                    var board = boards[i];
+                    if (board.Processed)
+                    {
+                        continue;
+                    }
+                    var tempBoards = new[]
+                    {
+                        board.Board.GetMoved(Direction.Left),
+                        board.Board.GetMoved(Direction.Right),
+                        board.Board.GetMoved(Direction.Up),
+                        board.Board.GetMoved(Direction.Down),
+                    };
 
-                if (Y == elem.Y)
-                {
-                    if (X < elem.X && CanMove(X, Y, Direction.Right))
-                        moves.Add((Direction.Right, elem));
-                    if (X > elem.X && CanMove(X, Y, Direction.Left))
-                        moves.Add((Direction.Right, elem));
+                    foreach (var tempBoard in tempBoards)
+                    {
+                        if (tempBoard.Score < 0)
+                            continue;
+                        var x = tempBoard.X;
+                        var y = tempBoard.Y;
+                        var oldBoard = allBoards[x, y];
+                        if (oldBoard == null || oldBoard.Score < tempBoard.Score && tempBoard.CanMoveAny())
+                        {
+                            newBoards.Add((allBoards[x, y] = tempBoard, false));
+                        }
+                    }
+                    board.Processed = true;
+                    i++;
                 }
-
-                if (X > elem.X && Y > elem.Y)
-                {
-                    if (CanMove(X, Y, Direction.Left))
-                        moves.Add((Direction.Left, elem));
-                    if (CanMove(X, Y, Direction.Up))
-                        moves.Add((Direction.Up, elem));
-                }
-
-                if (X > elem.X && Y < elem.Y)
-                {
-                    if (CanMove(X, Y, Direction.Left))
-                        moves.Add((Direction.Left, elem));
-                    if (CanMove(X, Y, Direction.Down))
-                        moves.Add((Direction.Down, elem));
-                }
-
-                if (X < elem.X && Y > elem.Y)
-                {
-                    if (CanMove(X, Y, Direction.Right))
-                        moves.Add((Direction.Right, elem));
-                    if (CanMove(X, Y, Direction.Up))
-                        moves.Add((Direction.Up, elem));
-                }
-
-                if (X < elem.X && Y < elem.Y)
-                {
-                    if (CanMove(X, Y, Direction.Right))
-                        moves.Add((Direction.Right, elem));
-                    if (CanMove(X, Y, Direction.Down))
-                        moves.Add((Direction.Down, elem));
-                }
-
+                if (newBoards.Count == 0)
+                    break;
+                boards = newBoards;
+                moves++;
             }
-            var res = (Direction.None, new Element(0,0));
-            if (moves.Count > 0)
-                res = moves[Rnd.Next(moves.Count)];
-            Console.WriteLine($@"({X},{Y}) {res.Item1} => {res.Item2.X}{res.Item2.Y}
-{string.Join(Environment.NewLine, nearest.Select(n => $"{n.Symbol} ({n.X}, {n.Y})"))}");
-            return res.Item1;
+
+            var found = boards.OrderByDescending(b => b.Board.Score).First().Board.Moves;
+            Console.WriteLine($"({X},{Y}) : {string.Join("+", found.Select(f => f.ToString()))}");
+            if (found.Count > 0)
+                return found.First();
+            return Direction.None;
+            
+
         }
 
         public bool CanMove(int x, int y, Direction dir)
@@ -237,14 +243,273 @@ namespace SnakeBattle.NewFolder1
             return result;
         }
 
-        public IEnumerator<Element> GetEnumerator()
+        public Board Clone(Direction dir)
         {
-            return Elements.Cast<Element>().GetEnumerator();
+            var board = new Board()
+            {
+                X = X,
+                Y = Y,
+                Direction = dir,
+                Elements = new Element[Size, Size],
+                Rage = Rage - 1,
+                Length = Length,
+                Stones = Stones,
+                Moves = new List<Direction>(Moves),
+                Size = Size,
+            };
+
+            for (int x = 0; x < Size; x++)
+            {
+                for(int y = 0; y < Size; y++)
+                {
+                    board.Elements[x,y] = new Element(x, y, Elements[x, y].Symbol, Elements[x, y].Moves);
+                }
+            }
+
+            switch(dir)
+            {
+                case Direction.Left:
+                    board.X--;
+                    break;
+                case Direction.Right:
+                    board.X++;
+                    break;
+                case Direction.Up:
+                    board.Y--;
+                    break;
+                case Direction.Down:
+                    board.Y++;
+                    break;
+            }
+
+            return board;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public int Distance(int x1, int y1, int x2, int y2)
         {
-            return Elements.Cast<Element>().GetEnumerator();
+            return Math.Abs(x2-x1) + Math.Abs(y2-y1);
+        }
+
+        public Board GetMoved(Direction dir)
+        {
+            Board board = new Board();
+
+            if (dir == Direction.Left && (Direction == Direction.Right || X < 1) ||
+                dir == Direction.Right && (Direction == Direction.Left || X > Size - 2) ||
+                dir == Direction.Down && (Direction == Direction.Up || Y > Size - 2) ||
+                dir == Direction.Up && (Direction == Direction.Down || Y < 1))
+            {
+                board.Score = -1000;
+                return board;
+            }
+
+            board = Clone(dir);
+            var newPos = (board.X, board.Y);
+            bool apple = false;
+            board.Moves.Add(dir);
+            var qq = $"{board.Elements[newPos.X, newPos.Y].Symbol} ({newPos.X},{newPos.Y})";
+            board.QQ += qq;
+
+            for (int x = 0; x < Size; x++)
+            {
+                for(int y = 0; y < Size; y++)
+                {
+                    switch(board.Elements[newPos.X, newPos.Y].Symbol)
+                    {
+                        case Constants.Wall:
+                            board.Score -= 1000;
+                            break;
+                        case Constants.None:
+                            break;
+                        case Constants.Apple:
+                            board.Length ++;
+                            board.Score ++;
+                            apple = true;
+                            break;
+                        case Constants.FuryPill:
+                            board.Rage += Constants.RageLength;
+                            break;
+                        case Constants.Gold:
+                            board.Score += 10;
+                            break;
+                        case Constants.Stone:
+                            board.Stones++;
+                            board.Score += 15;
+                            if (board.Rage > 0 || board.Length > 4)
+                            {
+                                board.Length -= 3;
+                            }
+                            else
+                            {
+                                board.Score -= 1000;
+                            }
+                            break;
+                        case Constants.EnemyTailEndDown:
+                        case Constants.EnemyTailEndLeft:
+                        case Constants.EnemyTailEndUp:
+                        case Constants.EnemyTailEndRight:
+                        case Constants.EnemyTailInactive:
+                        case Constants.EnemyBodyHorizontal:
+                        case Constants.EnemyBodyVertical:
+                        case Constants.EnemyBodyLeftDown:
+                        case Constants.EnemyBodyLeftUp:
+                        case Constants.EnemyBodyRightDown:
+                        case Constants.EnemyBodyRightUp:
+                        case Constants.EnemyHeadDown:
+                        case Constants.EnemyHeadUp:
+                        case Constants.EnemyHeadLeft:
+                        case Constants.EnemyHeadRight:
+                        case Constants.EnemyHeadEvil:
+                            board.Score += 20;
+                            break;
+                        
+                        case Constants.TailEndDown:
+                        case Constants.TailEndLeft:
+                        case Constants.TailEndUp:
+                        case Constants.TailEndRight:
+                        case Constants.TailInactive:
+                        case Constants.EnemyHeadDead:
+                        case Constants.BodyHorizontal:
+                        case Constants.BodyVertical:
+                        case Constants.BodyLeftDown:
+                        case Constants.BodyLeftUp:
+                        case Constants.BodyRightDown:
+                        case Constants.BodyRightUp:
+                            break;
+                    }
+                }
+            }
+            bool tailFound = false;
+            for (int x = 0; !tailFound && x < Size; x++)
+            {
+                for (int y = 0; !tailFound && y < Size; y++)
+                {
+                    if (!apple && Elements[x, y].AnyOf(Constants.MyTail))
+                    {
+                        tailFound = true;
+                        board.Elements[x, y].Symbol = Constants.None;
+                        switch (Elements[x, y].Symbol)
+                        {
+                            case Constants.TailEndDown:
+                                if (y < 1)
+                                    break;
+                                switch (Elements[x, y - 1].Symbol)
+                                {
+                                    case Constants.BodyRightDown:
+                                        board.Elements[x, y - 1].Symbol = Constants.TailEndRight;
+                                        break;
+                                    case Constants.BodyLeftDown:
+                                        board.Elements[x, y - 1].Symbol = Constants.TailEndLeft;
+                                        break;
+                                    default:
+                                        board.Elements[x, y - 1].Symbol = Constants.TailEndDown;
+                                        break;
+                                }
+
+                                break;
+                            case Constants.TailEndUp:
+                                if (y > Size - 2)
+                                    break;
+                                switch (Elements[x, y + 1].Symbol)
+                                {
+                                    case Constants.BodyRightUp:
+                                        board.Elements[x, y + 1].Symbol = Constants.TailEndRight;
+                                        break;
+                                    case Constants.BodyLeftUp:
+                                        board.Elements[x, y + 1].Symbol = Constants.TailEndLeft;
+                                        break;
+                                    default:
+                                        board.Elements[x, y + 1].Symbol = Constants.TailEndUp;
+                                        break;
+                                }
+                                break;
+                            case Constants.TailEndLeft:
+                                if (x < 1)
+                                    break;
+                                switch (Elements[x - 1, y].Symbol)
+                                {
+                                    case Constants.BodyRightUp:
+                                        board.Elements[x - 1, y].Symbol = Constants.TailEndUp;
+                                        break;
+                                    case Constants.BodyRightDown:
+                                        board.Elements[x - 1, y].Symbol = Constants.TailEndDown;
+                                        break;
+                                    default:
+                                        board.Elements[x - 1, y].Symbol = Constants.TailEndLeft;
+                                        break;
+                                }
+                                break;
+                            case Constants.TailEndRight:
+                                if (x > Size - 2)
+                                    break;
+                                switch (Elements[x + 1, y].Symbol)
+                                {
+                                    case Constants.BodyRightUp:
+                                        board.Elements[x + 1, y].Symbol = Constants.TailEndUp;
+                                        break;
+                                    case Constants.BodyLeftUp:
+                                        board.Elements[x + 1, y].Symbol = Constants.TailEndDown;
+                                        break;
+                                    default:
+                                        board.Elements[x + 1, y].Symbol = Constants.TailEndRight;
+
+                                        break;
+                                }
+                                return board;
+                        }
+                    }
+                }
+            }
+            return board;
+        }
+
+        public bool CanMoveAny()
+        {
+            return CanMove(Direction.Left) ||
+                CanMove(Direction.Right) ||
+                CanMove(Direction.Up) ||
+                CanMove(Direction.Down);
+        }
+
+        public bool CanMove(Direction dir)
+        {
+            var x = X;
+            var y = Y;
+            var el = Elements[x, y].Symbol;
+            switch (dir)
+            {
+                case Direction.Left:
+                    if (x > 0)
+                    {
+                        el = Elements[x - 1, y].Symbol;
+                        return el != Constants.BodyHorizontal && el != Constants.BodyRightDown && el != Constants.BodyRightUp;
+                    }
+                    else
+                        return false;
+                case Direction.Right:
+                    if (x < Size - 1)
+                    {
+                        return el != Constants.BodyHorizontal && el != Constants.BodyLeftDown && el != Constants.BodyLeftUp;
+                    }
+                    else
+                        return false;
+                case Direction.Up:
+                    if (y > 0)
+                    {
+                        return el != Constants.BodyVertical && el != Constants.BodyRightDown && el != Constants.BodyLeftDown;
+                    }
+                    else
+                        return false;
+                case Direction.Down:
+                    if (y < Size - 1)
+                    {
+                        return el != Constants.BodyVertical && el != Constants.BodyRightUp && el != Constants.BodyLeftUp;
+                    }
+                    else
+                        return false;
+                default:
+                    return false;
+            }
         }
     }
 }

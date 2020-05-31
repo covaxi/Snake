@@ -8,6 +8,8 @@ namespace SnakeBattle.NewFolder1
 {
     public class Constants
     {
+        public const int RageLength = 15;
+
         public static readonly char[] Closed = new[]
         {
             Constants.Stone,
@@ -49,14 +51,14 @@ namespace SnakeBattle.NewFolder1
             Constants.EnemyHeadEvil,
         };
 
-        public static char[] ElementsToReach = new[]
+        public static readonly char[] ElementsToReach = new[]
         {
             Constants.Apple,
             Constants.FuryPill,
             Constants.Gold,
         };
 
-        public static char[] MyHead = new[]
+        public static readonly char[] MyHead = new[]
         {
             Constants.HeadDead, 
             Constants.HeadDown, 
@@ -68,7 +70,7 @@ namespace SnakeBattle.NewFolder1
             Constants.HeadSleep
         };
 
-        public static char[] Passable = new[]
+        public static readonly char[] Passable = new[]
         {
             Constants.None,
             Constants.Apple,
@@ -103,6 +105,46 @@ namespace SnakeBattle.NewFolder1
             Constants.EnemyBodyRightDown,
             Constants.EnemyBodyRightUp,
         };
+
+        public static readonly char[] Enemy = new[]
+        {
+                        Constants.EnemyHeadSleep,
+            Constants.EnemyTailEndDown,
+            Constants.EnemyTailEndLeft,
+            Constants.EnemyTailEndUp,
+            Constants.EnemyTailEndRight,
+            Constants.EnemyTailInactive,
+            Constants.EnemyBodyHorizontal,
+            Constants.EnemyBodyVertical,
+            Constants.EnemyBodyLeftDown,
+            Constants.EnemyBodyLeftUp,
+            Constants.EnemyBodyRightDown,
+            Constants.EnemyBodyRightUp,
+                        Constants.EnemyHeadDown,
+            Constants.EnemyHeadLeft,
+            Constants.EnemyHeadRight,
+            Constants.EnemyHeadUp,
+            Constants.EnemyHeadDead,
+        };
+
+        public static readonly char[] Me = new[]
+        {
+            Constants.BodyHorizontal,
+            Constants.BodyVertical,
+            Constants.BodyLeftDown,
+            Constants.BodyLeftUp,
+            Constants.BodyRightDown,
+            Constants.BodyRightUp,
+        };
+
+        public static readonly char[] MyTail = new[]
+{
+            Constants.TailEndDown,
+            Constants.TailEndLeft,
+            Constants.TailEndUp,
+            Constants.TailEndRight,
+        };
+
 
         #region Символы
 

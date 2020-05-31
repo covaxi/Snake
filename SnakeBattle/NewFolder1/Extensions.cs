@@ -26,12 +26,5 @@ namespace SnakeBattle.NewFolder1
         {
             return elements.Where(e => e.Symbol == symbol);
         }
-
-        public static IEnumerable<Element> GetAll(this Board board, char symbol)
-        {
-            return board.Where(e => e.Symbol == symbol);
-        }
-
-
     }
 }
