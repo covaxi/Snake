@@ -334,7 +334,7 @@ namespace SnakeBattle.NewFolder1
                             break;
                         case Constants.Stone:
                             board.Stones++;
-                            board.Score += 15;
+                            board.Score += Constants.StoneWeight;
                             if (board.Rage > 0 || board.Length > 4)
                             {
                                 board.Length -= 3;

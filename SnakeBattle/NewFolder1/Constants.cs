@@ -8,7 +8,8 @@ namespace SnakeBattle.NewFolder1
 {
     public class Constants
     {
-        public const int RageLength = 15;
+        public const int RageLength = 10;
+        public const int StoneWeight = 3;
 
         public static readonly char[] Closed = new[]
         {
