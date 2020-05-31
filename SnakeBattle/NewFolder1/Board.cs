@@ -103,10 +103,20 @@ namespace SnakeBattle.NewFolder1
             return false;
         }
 
+        public void Restart()
+        {
+            // TODO
+        }
+
         public void Process(string board)
         {
             board = board.Replace("board=", "");
-            Size = (int)Math.Sqrt(board.Length);
+            var newSize = (int)Math.Sqrt(board.Length);
+            if (Size != newSize)
+            {
+                Size = newSize;
+                Restart();
+            }
             var x = 0;
             var y = 0;
             Elements = new Element[Size, Size];
