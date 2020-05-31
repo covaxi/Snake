@@ -30,11 +30,9 @@
         {
             this.tbUrl = new System.Windows.Forms.TextBox();
             this.lbUrl = new System.Windows.Forms.Label();
-            this.pbImage = new System.Windows.Forms.PictureBox();
             this.bConnect = new System.Windows.Forms.Button();
-            this.bShowLog = new System.Windows.Forms.Button();
             this.bResize = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.pbImage)).BeginInit();
+            this.lvLog = new System.Windows.Forms.ListView();
             this.SuspendLayout();
             // 
             // tbUrl
@@ -55,17 +53,6 @@
             this.lbUrl.TabIndex = 1;
             this.lbUrl.Text = "Server URL";
             // 
-            // pbImage
-            // 
-            this.pbImage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbImage.Location = new System.Drawing.Point(12, 67);
-            this.pbImage.Name = "pbImage";
-            this.pbImage.Size = new System.Drawing.Size(517, 248);
-            this.pbImage.TabIndex = 2;
-            this.pbImage.TabStop = false;
-            // 
             // bConnect
             // 
             this.bConnect.Location = new System.Drawing.Point(15, 38);
@@ -76,19 +63,9 @@
             this.bConnect.UseVisualStyleBackColor = true;
             this.bConnect.Click += new System.EventHandler(this.bConnect_Click);
             // 
-            // bShowLog
-            // 
-            this.bShowLog.Location = new System.Drawing.Point(97, 38);
-            this.bShowLog.Name = "bShowLog";
-            this.bShowLog.Size = new System.Drawing.Size(75, 23);
-            this.bShowLog.TabIndex = 4;
-            this.bShowLog.Text = "Toggle log";
-            this.bShowLog.UseVisualStyleBackColor = true;
-            this.bShowLog.Click += new System.EventHandler(this.bShowLog_Click);
-            // 
             // bResize
             // 
-            this.bResize.Location = new System.Drawing.Point(179, 38);
+            this.bResize.Location = new System.Drawing.Point(96, 38);
             this.bResize.Name = "bResize";
             this.bResize.Size = new System.Drawing.Size(75, 23);
             this.bResize.TabIndex = 5;
@@ -96,21 +73,28 @@
             this.bResize.UseVisualStyleBackColor = true;
             this.bResize.Click += new System.EventHandler(this.bResize_Click);
             // 
+            // lvLog
+            // 
+            this.lvLog.HideSelection = false;
+            this.lvLog.Location = new System.Drawing.Point(12, 67);
+            this.lvLog.Name = "lvLog";
+            this.lvLog.Size = new System.Drawing.Size(517, 248);
+            this.lvLog.TabIndex = 6;
+            this.lvLog.UseCompatibleStateImageBehavior = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(541, 327);
+            this.Controls.Add(this.lvLog);
             this.Controls.Add(this.bResize);
-            this.Controls.Add(this.bShowLog);
             this.Controls.Add(this.bConnect);
-            this.Controls.Add(this.pbImage);
             this.Controls.Add(this.lbUrl);
             this.Controls.Add(this.tbUrl);
             this.Name = "MainForm";
             this.Text = "Snake battle";
             this.Activated += new System.EventHandler(this.MainForm_Activated);
-            ((System.ComponentModel.ISupportInitialize)(this.pbImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -120,10 +104,9 @@
 
         private System.Windows.Forms.TextBox tbUrl;
         private System.Windows.Forms.Label lbUrl;
-        private System.Windows.Forms.PictureBox pbImage;
         private System.Windows.Forms.Button bConnect;
-        private System.Windows.Forms.Button bShowLog;
         private System.Windows.Forms.Button bResize;
+        private System.Windows.Forms.ListView lvLog;
     }
 }
 

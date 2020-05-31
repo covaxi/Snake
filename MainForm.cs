@@ -46,11 +46,6 @@ namespace SnakeBattle
             Connect();
         }
 
-        private void bShowLog_Click(object sender, EventArgs e)
-        {
-            ToggleLogWindow();
-        }
-
         private void bResize_Click(object sender, EventArgs e)
         {
             ResizeDefault();
@@ -67,6 +62,8 @@ namespace SnakeBattle
                 FirstTimeActivation = false;
             }
         }
+
+        #endregion
 
         #endregion
     }
