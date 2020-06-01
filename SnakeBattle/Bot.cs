@@ -27,16 +27,33 @@ namespace SnakeBattle
         void Log(string s)
         {
             Logger.Info(s);
-            Console.WriteLine(s);
+            // Console.WriteLine(s);
         }
 
+        string prevBoard = "";
         private void Socket_OnMessage(object sender, MessageEventArgs e)
         {
+            prevBoard = e.Data;
             board.Process(e.Data.Replace("board=", ""));
-            Console.Clear();
+            if (board.X == 1)
+            {
+                Console.Clear();
+                socket.Send("ACT");
+                return;
+            }
+            // Console.Clear();
 
             Log($"{Environment.NewLine}{board}");
-            socket.Send(board.GetMove().ToString());
+            var move = board.GetMove();
+            string moveStr = "";
+            if ((int)move == 0)
+                moveStr = "ACT";
+            else
+                moveStr = move.ToString();
+
+            Console.WriteLine($"  -- {moveStr} --");
+
+            socket.Send(moveStr);
         }
 
         private void Socket_OnOpen(object sender, EventArgs e)

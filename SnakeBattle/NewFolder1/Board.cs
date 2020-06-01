@@ -94,7 +94,7 @@ namespace SnakeBattle.NewFolder1
 
             int moves = 0;
             int oldCount = 0;
-            while(moves < 150)
+            while(moves++ < 5)
             {
                 var newBoards = new List<(Board Board, bool Processed)>();
                 int i = 0;
@@ -120,7 +120,7 @@ namespace SnakeBattle.NewFolder1
                         var x = tempBoard.X;
                         var y = tempBoard.Y;
                         var oldBoard = allBoards[x, y];
-                        if (oldBoard == null || oldBoard.Score < tempBoard.Score && tempBoard.CanMoveAny())
+                        if (oldBoard == null || oldBoard.Score <= tempBoard.Score && tempBoard.CanMoveAny())
                         {
                             newBoards.Add((allBoards[x, y] = tempBoard, false));
                         }
@@ -129,13 +129,16 @@ namespace SnakeBattle.NewFolder1
                     i++;
                 }
                 if (newBoards.Count == 0)
+                {
+                    Console.WriteLine($"{moves} break");
                     break;
+                }
                 boards = newBoards;
                 moves++;
             }
 
             var found = boards.OrderByDescending(b => b.Board.Score).First().Board.Moves;
-            Console.WriteLine($"({X},{Y}) : {string.Join("+", found.Select(f => f.ToString()))}");
+            // Console.WriteLine($"({X},{Y}) : {string.Join("+", found.Select(f => f.ToString()))}");
             if (found.Count > 0)
                 return found.First();
             return Direction.None;
@@ -294,10 +297,10 @@ namespace SnakeBattle.NewFolder1
         {
             Board board = new Board();
 
-            if (dir == Direction.Left && (Direction == Direction.Right || X < 1) ||
+            if (dir == Direction.Left && (Direction == Direction.Right || X < 2) ||
                 dir == Direction.Right && (Direction == Direction.Left || X > Size - 2) ||
                 dir == Direction.Down && (Direction == Direction.Up || Y > Size - 2) ||
-                dir == Direction.Up && (Direction == Direction.Down || Y < 1))
+                dir == Direction.Up && (Direction == Direction.Down || Y < 2))
             {
                 board.Score = -1000;
                 return board;
@@ -359,15 +362,10 @@ namespace SnakeBattle.NewFolder1
                         case Constants.EnemyHeadUp:
                         case Constants.EnemyHeadLeft:
                         case Constants.EnemyHeadRight:
-                        case Constants.EnemyHeadEvil:
+                        
                             board.Score += 20;
                             break;
                         
-                        case Constants.TailEndDown:
-                        case Constants.TailEndLeft:
-                        case Constants.TailEndUp:
-                        case Constants.TailEndRight:
-                        case Constants.TailInactive:
                         case Constants.EnemyHeadDead:
                         case Constants.BodyHorizontal:
                         case Constants.BodyVertical:
@@ -375,6 +373,14 @@ namespace SnakeBattle.NewFolder1
                         case Constants.BodyLeftUp:
                         case Constants.BodyRightDown:
                         case Constants.BodyRightUp:
+                            board.Score -= 10;
+                            break;
+                        case Constants.TailEndDown:
+                        case Constants.TailEndLeft:
+                        case Constants.TailEndUp:
+                        case Constants.TailEndRight:
+                        case Constants.TailInactive:
+                        case Constants.EnemyHeadEvil:
                             break;
                     }
                 }

@@ -9,7 +9,7 @@ namespace SnakeBattle
 {
     class Program
     {
-        const string GameUrl = "http://codebattle-pro-2020s1.westeurope.cloudapp.azure.com/codenjoy-contest/board/player/u5xw3rff3itajst5v0mx?code=4981074646556020427&gameName=snakebattle";
+        const string GameUrl = "http://codebattle-pro-2020s1.westeurope.cloudapp.azure.com/codenjoy-contest/board/player/su1nfuikcpedebzflkx0?code=5453968337040027982&gameName=snakebattle";
 
         static Logger Logger = LogManager.GetCurrentClassLogger();
 
